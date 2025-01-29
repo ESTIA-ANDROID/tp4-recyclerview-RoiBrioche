@@ -9,6 +9,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.openclassrooms.magicgithub.R
 import com.openclassrooms.magicgithub.di.Injection.getRepository
 import com.openclassrooms.magicgithub.model.User
+import androidx.recyclerview.widget.ItemTouchHelper
 
 class ListUserActivity : AppCompatActivity(), UserListAdapter.Listener {
     // FOR DESIGN ---
@@ -36,6 +37,41 @@ class ListUserActivity : AppCompatActivity(), UserListAdapter.Listener {
         recyclerView = findViewById(R.id.activity_list_user_rv)
         adapter = UserListAdapter(this)
         recyclerView.adapter = adapter
+
+
+
+        // Ajout du Swipe
+        val itemTouchHelperCallback = object : ItemTouchHelper.SimpleCallback(
+            ItemTouchHelper.UP or ItemTouchHelper.DOWN,// On permet le déplacement vertical
+            ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT// On garde les options de swipe
+        ) {
+            override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
+                val fromPosition = viewHolder.adapterPosition
+                val toPosition = target.adapterPosition
+
+                // Déplacer l'élément dans la liste
+                adapter.onItemMove(fromPosition, toPosition)
+
+                // Notifier l'adaptateur pour rafraîchir l'affichage
+                adapter.notifyItemMoved(fromPosition, toPosition)
+
+                return true
+            }
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val position = viewHolder.adapterPosition
+                val user = adapter.getUserAt(position) // Assure-toi d'ajouter cette méthode dans UserListAdapter
+
+                // Basculer entre actif/inactif
+                user.isActive = !user.isActive
+
+                // Met à jour l'affichage de la cellule
+                adapter.notifyItemChanged(position)
+            }
+        }
+
+        // Attacher le swipe au RecyclerView
+        ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(recyclerView)
     }
 
     private fun configureFab() {
@@ -56,4 +92,5 @@ class ListUserActivity : AppCompatActivity(), UserListAdapter.Listener {
         getRepository().deleteUser(user)
         loadData()
     }
+
 }

@@ -28,5 +28,8 @@ class UserRepository(
         apiService.deleteUser(user) // Retirer l'utilisateur de la liste
     }
 
+    fun switch(user1: User, user2: User) {
+        getUsers()
+    }
 
 }

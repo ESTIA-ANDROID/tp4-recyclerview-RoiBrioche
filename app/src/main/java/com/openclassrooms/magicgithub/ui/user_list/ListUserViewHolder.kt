@@ -11,7 +11,11 @@ import com.openclassrooms.magicgithub.R
 import com.openclassrooms.magicgithub.model.User
 import com.openclassrooms.magicgithub.api.FakeApiServiceGenerator
 
-class ListUserViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+import com.openclassrooms.magicgithub.databinding.ItemListUserBinding
+import android.graphics.Color
+
+
+class ListUserViewHolder(private val binding: ItemListUserBinding) : RecyclerView.ViewHolder(binding.root) {
     // FOR DESIGN ---
     private var avatar: ImageView = itemView.findViewById(R.id.item_list_user_avatar)
     private val username: TextView = itemView.findViewById(R.id.item_list_user_username)
@@ -22,13 +26,19 @@ class ListUserViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         // Utilisation de la Fake API pour générer l'URL de l'avatar
         val avatarUrl = FakeApiServiceGenerator.getAvatarUrl(user.login) // Utilise ici le nom de l'utilisateur
 
-        Glide.with(itemView.context)
+        Glide.with(binding.root.context)
             .load(avatarUrl)
             .apply(RequestOptions.circleCropTransform())
-            .into(avatar)  // L'image sera affichée ici dans l'ImageView
+            .into(binding.itemListUserAvatar)  // L'image sera affichée ici dans l'ImageView
         username.text = user.login
         deleteButton.setOnClickListener { callback.onClickDelete(user) }
-    }
 
+        // Changer la couleur de fond selon l'état actif/inactif
+        binding.root.setBackgroundColor(
+            if (user.isActive) Color.WHITE else Color.RED
+        )
+
+        binding.itemListUserDeleteButton.setOnClickListener { callback.onClickDelete(user) }
+    }
 
 }
