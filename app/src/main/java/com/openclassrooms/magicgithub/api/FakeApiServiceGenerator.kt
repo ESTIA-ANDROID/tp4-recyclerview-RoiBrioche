@@ -1,9 +1,14 @@
 package com.openclassrooms.magicgithub.api
 
+
 import com.openclassrooms.magicgithub.model.User
 import java.util.*
 
 object FakeApiServiceGenerator {
+
+    fun getAvatarUrl(name: String): String {
+        return "https://ui-avatars.com/api/?name=${name.replace(" ", "+")}&size=512"
+    }
 
     @JvmField
     var FAKE_USERS = mutableListOf(

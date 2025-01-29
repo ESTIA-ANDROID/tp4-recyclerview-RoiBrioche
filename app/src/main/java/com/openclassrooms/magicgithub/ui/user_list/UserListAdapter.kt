@@ -7,6 +7,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.openclassrooms.magicgithub.R
 import com.openclassrooms.magicgithub.model.User
 import com.openclassrooms.magicgithub.utils.UserDiffCallback
+import com.bumptech.glide.Glide
+import com.openclassrooms.magicgithub.api.FakeApiServiceGenerator
 
 class UserListAdapter(  // FOR CALLBACK ---
     private val callback: Listener
@@ -24,6 +26,7 @@ class UserListAdapter(  // FOR CALLBACK ---
         val view = inflater.inflate(R.layout.item_list_user, parent, false)
         return ListUserViewHolder(view)
     }
+
 
     override fun onBindViewHolder(holder: ListUserViewHolder, position: Int) {
         holder.bind(users[position], callback)

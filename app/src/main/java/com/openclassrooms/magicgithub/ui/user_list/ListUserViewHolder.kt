@@ -9,6 +9,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.openclassrooms.magicgithub.R
 import com.openclassrooms.magicgithub.model.User
+import com.openclassrooms.magicgithub.api.FakeApiServiceGenerator
 
 class ListUserViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     // FOR DESIGN ---
@@ -17,12 +18,17 @@ class ListUserViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     private val deleteButton: ImageButton = itemView.findViewById(R.id.item_list_user_delete_button)
 
     fun bind(user: User, callback: UserListAdapter.Listener) {
+
+        // Utilisation de la Fake API pour générer l'URL de l'avatar
+        val avatarUrl = FakeApiServiceGenerator.getAvatarUrl(user.login) // Utilise ici le nom de l'utilisateur
+
         Glide.with(itemView.context)
-            .load(user.avatarUrl)
+            .load(avatarUrl)
             .apply(RequestOptions.circleCropTransform())
-            .into(avatar)
+            .into(avatar)  // L'image sera affichée ici dans l'ImageView
         username.text = user.login
         deleteButton.setOnClickListener { callback.onClickDelete(user) }
     }
+
 
 }
