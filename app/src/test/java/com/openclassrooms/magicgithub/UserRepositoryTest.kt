@@ -58,52 +58,66 @@ class UserRepositoryTest {
         Assert.assertFalse(userRepository.getUsers().contains(userToDelete))
     }
 
-    // Test pour vérifier que l'état 'actif' ou 'inactif' de l'utilisateur est bien mis à jour
     @Test
     fun testUserActivationState() {
-        val user = userRepository.getUsers()[0]
+        // Récupère un utilisateur de la liste avant modification
+        val user = userRepository.getUsers().first()
 
-        // Vérifie que l'utilisateur est initialement actif
-        assertTrue("User should be active initially", user.isActive)
+        // Récupère l'état initial de l'utilisateur
+        val initialState = user.isActive
 
-        // Désactive l'utilisateur
-        user.isActive = false
+        // Inverse l'état de l'utilisateur et met à jour via le repository
+        val updatedUser = user.copy(isActive = !initialState) // Inverse l'état
+        userRepository.updateUser(updatedUser)
 
-        // Vérifie que l'utilisateur est bien inactif
-        assertFalse("User should be inactive after deactivation", user.isActive)
+        // Récupère l'utilisateur mis à jour après modification
+        val modifiedUser = userRepository.getUsers().first { it.id == user.id }
 
-        // Réactive l'utilisateur
-        user.isActive = true
+        // Vérifie que l'état a changé après la mise à jour
+        assertNotEquals("User state should change after deactivation/reactivation", initialState, modifiedUser.isActive)
 
-        // Vérifie que l'utilisateur est bien réactivé
-        assertTrue("User should be active after reactivation", user.isActive)
+        // Inverse à nouveau l'état de l'utilisateur pour la réactivation ou désactivation
+        val finalUser = modifiedUser.copy(isActive = !modifiedUser.isActive) // Inverse encore une fois
+        userRepository.updateUser(finalUser)
+
+        // Récupère l'utilisateur mis à jour après la réactivation
+        val finalUpdatedUser = userRepository.getUsers().first { it.id == user.id }
+
+        // Vérifie que l'état a changé à nouveau
+        assertNotEquals("User state should change after reactivation/deactivation", modifiedUser.isActive, finalUpdatedUser.isActive)
     }
 
     @Test
     fun testItemMoving() {
-        val fromPosition = 0
-        val toPosition = 2
-        val users = userRepository.getUsers()
+        val initialUsers = userRepository.getUsers().toMutableList()
 
-        // Crée une instance de l'adapter
-        val adapter = UserListAdapter(object : UserListAdapter.Listener {
-            override fun onClickDelete(user: User) {
-                // Implémentation vide pour le test
-            }
-        })
+        // Vérifie que la liste n'est pas vide
+        assertNotNull(initialUsers)
+        assertTrue("User list should not be empty", initialUsers.isNotEmpty())
 
-        // Vérifie l'ordre initial des utilisateurs
-        assertEquals("001", users[fromPosition].id)
-        assertEquals("003", users[toPosition].id)
+        // Récupère les utilisateurs avant de les déplacer
+        val fromUser = initialUsers[0]
+        val toUser = initialUsers[2]
 
-        // Appel à la méthode de déplacement
-        adapter.onItemMove(fromPosition, toPosition)
+        // Vérifie les IDs des utilisateurs avant l'échange
+        val fromUserId = fromUser.id
+        val toUserId = toUser.id
+
+        // Appelle la méthode swapUser pour échanger les utilisateurs
+        userRepository.swapUsers(fromUser, toUser)
+
+        // Récupère la liste des utilisateurs après le déplacement
+        val updatedUsers = userRepository.getUsers()
+
+        // Vérifie que la taille de la liste n'a pas changé
+        assertEquals("The list size should remain the same", initialUsers.size, updatedUsers.size)
 
         // Vérifie que les utilisateurs ont bien été déplacés
-        assertEquals("003", users[fromPosition].id)
-        assertEquals("001", users[toPosition].id)
+        val swappedFromUser = updatedUsers[0]
+        val swappedToUser = updatedUsers[2]
 
-        // Vérifie que la taille de la liste reste la même
-        assertEquals(3, users.size)
+        assertEquals("The user at the first position should have the ID of the original second user", toUserId, swappedFromUser.id)
+        assertEquals("The user at the second position should have the ID of the original first user", fromUserId, swappedToUser.id)
     }
+
 }

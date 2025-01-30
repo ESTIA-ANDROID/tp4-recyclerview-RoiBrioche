@@ -39,33 +39,43 @@ class ListUserActivity : AppCompatActivity(), UserListAdapter.Listener {
         recyclerView.adapter = adapter
 
 
-
         // Ajout du Swipe
         val itemTouchHelperCallback = object : ItemTouchHelper.SimpleCallback(
             ItemTouchHelper.UP or ItemTouchHelper.DOWN,// On permet le déplacement vertical
             ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT// On garde les options de swipe
         ) {
+
             override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
                 val fromPosition = viewHolder.adapterPosition
                 val toPosition = target.adapterPosition
 
-                // Déplacer l'élément dans la liste
-                adapter.onItemMove(fromPosition, toPosition)
+                // Récupérer les utilisateurs concernés depuis UserRepository
+                val userList = getRepository().getUsers().toMutableList()
+                val user1 = userList[fromPosition]
+                val user2 = userList[toPosition]
 
-                // Notifier l'adaptateur pour rafraîchir l'affichage
+                // Effectuer l'échange dans la base via l'API
+                getRepository().swapUsers(user1, user2)
+
+                // Notifier l'adaptateur après mise à jour de la base
                 adapter.notifyItemMoved(fromPosition, toPosition)
 
                 return true
             }
 
+
+
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 val position = viewHolder.adapterPosition
-                val user = adapter.getUserAt(position) // Assure-toi d'ajouter cette méthode dans UserListAdapter
+                val user = adapter.getUserAt(position)
 
                 // Basculer entre actif/inactif
                 user.isActive = !user.isActive
 
-                // Met à jour l'affichage de la cellule
+                // Mettre à jour l'utilisateur dans la base de données via UserRepository
+                getRepository().updateUser(user)
+
+                // Met à jour l'affichage
                 adapter.notifyItemChanged(position)
             }
         }

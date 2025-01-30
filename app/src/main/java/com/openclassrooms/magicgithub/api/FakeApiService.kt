@@ -1,6 +1,7 @@
 package com.openclassrooms.magicgithub.api
 
 import com.openclassrooms.magicgithub.model.User
+import java.util.Collections
 
 class FakeApiService : ApiService {
     private var _users = FakeApiServiceGenerator.FAKE_USERS
@@ -33,4 +34,21 @@ class FakeApiService : ApiService {
         // Retirer l'utilisateur de la liste en fonction de son ID
         _users = _users.filter { it.id != user.id }.toMutableList()
     }
+
+    override fun updateUser(user: User) {
+        val index = _users.indexOfFirst { it.id == user.id }
+        if (index != -1) {
+            _users[index] = user
+        }
+    }
+
+    override fun swapUsers(user1: User, user2: User) {
+        val index1 = _users.indexOfFirst { it.id == user1.id }
+        val index2 = _users.indexOfFirst { it.id == user2.id }
+
+        if (index1 != -1 && index2 != -1) {
+            Collections.swap(_users, index1, index2)
+        }
+    }
+
 }
